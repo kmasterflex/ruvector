@@ -162,6 +162,49 @@ The devices learn each student's patterns over time, creating a rich longitudina
 
 ---
 
+## Why This Matters Now: The Misinformation Crisis Is a Literacy Crisis
+
+AI-generated misinformation is no longer novel. What is new is how it travels.
+
+A prompt becomes output. Output becomes a post, a press release, a talking point. Somewhere between generation and distribution, responsibility disappears. These are what researcher Alexis Crews calls "portable lies" — content that moves frictionlessly across platforms while the rules meant to govern it remain stuck in place.
+
+The threat is not outright fabrication. It is grey propaganda: selectively true, strategically framed, plausible-sounding content at overwhelming volume. AI makes ambiguity cheap, repetition effortless, and attribution easy to obscure. The goal is not to convince anyone of a specific lie. It is to flood information environments until trust itself collapses.
+
+This generation of students already lives in that collapse. They trust nothing — not news, not institutions, not historical archives. And every proposed defense is playing the same game as the attack: more classifiers, more detection systems, more content moderation. Language-based defenses against language-based weapons, in an arms race that defense will always lose because the attacker sets the pace.
+
+**Omega School's thesis is that the real defense is a different kind of human.**
+
+### Why Language-Only Literacy Is Now a Vulnerability
+
+Every influence operation optimizes for one channel: linguistic processing. Persuasion, framing, narrative manipulation, emotional triggering — all of it targets the part of human cognition that processes words and stories.
+
+A population trained exclusively in text-based literacy is maximally vulnerable to text-based manipulation. This is not a failure of critical thinking. It is a failure of perceptual range. When the only way you can evaluate a claim is by reading more claims, you are trapped inside the medium the attacker controls.
+
+### What Perceptual Literacy Changes
+
+A student trained in perceptual, somatic, and kinesthetic literacy has access to evaluation channels that language-based AI cannot reach.
+
+**Pattern sensing without narrative.** When a student can look at a vector space visualization and see that a cluster of claims shares structural similarity despite surface-level variation, they are detecting coordinated messaging — not by reading each claim, but by seeing the shape of the operation. Grey propaganda relies on the appearance of independent origin. In a vector space, coordination is geometrically visible.
+
+**Embodied ground truth.** A student who grows food every day has a relationship with a system that cannot be propagandized. Soil either produces or it doesn't. Seeds either germinate or they don't. When you have daily experience with systems that do not respond to narrative — only to conditions — you develop an internal calibration for the difference between claims and reality. That calibration transfers.
+
+**Economic sensing.** A student managing a real economy ($OMEGAHEARTS) knows what reciprocity feels like from the inside. When someone presents an economic argument, the student doesn't just evaluate the logic — they test it against lived experience of how value actually moves between people. Propaganda that "feels wrong" to someone with economic embodiment is propaganda that never had to be fact-checked.
+
+**Temporal pattern recognition.** Influence operations depend on speed — viral spread before verification catches up. A student trained to recognize temporal patterns in data (through their device's SNN learning) develops sensitivity to velocity itself as a signal. When information moves unnaturally fast, they sense the pace before they read the content.
+
+### From Defense to Action
+
+Perceptual literacy is not just a shield. It is a foundation for action.
+
+Students who can sense pattern manipulation are students who can trace it. Students working on real community problems — food systems, public health, local economics — encounter misinformation not as an abstract threat but as an obstacle to their projects. When false health claims affect Garden Grove families, that is a research problem for the Situation Room. When manipulated economic data distorts community planning, students have the tools and the motivation to surface the distortion.
+
+This is the difference between media literacy programs that teach students to be skeptical consumers and a school that trains students to be active participants in the integrity of their information environment.
+
+The first approach produces people who distrust everything.
+The second produces people who can sense what is real — and act on it.
+
+---
+
 ## Why $20, Not $400
 
 A Chromebook costs $300-400, requires cloud infrastructure, sends student data to corporate servers, breaks in a backpack, and trains students to be consumers of platforms.
