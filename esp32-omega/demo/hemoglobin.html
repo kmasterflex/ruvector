@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hemoglobin — Omega School Perceptual Literacy Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0f;
+  color: #fff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+canvas { display: block; }
+
+/* ── Landing Screen ── */
+#landing {
+  position: fixed; inset: 0; z-index: 100;
+  background: #0a0a0f;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+#landing.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+#landing .subtitle {
+  font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: #5a7aff; margin-bottom: 1rem; font-weight: 600;
+}
+#landing h1 {
+  font-size: 4rem; font-weight: 700; letter-spacing: -0.02em;
+  margin-bottom: 1.5rem; color: #fff;
+}
+#landing .body-text {
+  max-width: 560px; text-align: center; font-size: 0.95rem;
+  color: #a0aec0; line-height: 1.7; margin-bottom: 2.5rem;
+}
+#start-btn {
+  background: #5a7aff; color: #fff; border: none;
+  padding: 0.8rem 2.4rem; font-size: 0.95rem; font-weight: 600;
+  border-radius: 6px; cursor: pointer; font-family: inherit;
+  transition: background 0.2s;
+}
+#start-btn:hover { background: #4a6aef; }
+#start-btn:focus { outline: 2px solid #5a7aff; outline-offset: 4px; }
+
+/* ── Top Bar ── */
+#top-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  padding: 1rem 1.5rem;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #a0aec0; opacity: 0;
+  transition: opacity 0.6s ease;
+}
+#top-bar.visible { opacity: 1; }
+#top-bar .left { font-weight: 600; color: #5a7aff; }
+
+/* ── Narration Panel ── */
+#narration {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
+  background: linear-gradient(to top, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0.8) 60%, transparent 100%);
+  padding: 3rem 2rem 2rem;
+  opacity: 0; transition: opacity 0.6s ease;
+}
+#narration.visible { opacity: 1; }
+#narration .inner { max-width: 600px; margin: 0 auto; }
+#narration .layer-label {
+  font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: #5a7aff; font-weight: 600; margin-bottom: 0.5rem;
+}
+#narration .step-title {
+  font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+#narration .step-body {
+  font-size: 0.88rem; color: #a0aec0; line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+.nav-row {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-btn {
+  background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.12);
+  padding: 0.5rem 1.4rem; font-size: 0.8rem; font-weight: 600;
+  border-radius: 5px; cursor: pointer; font-family: inherit;
+  transition: background 0.2s;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.15); }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+.step-dots {
+  display: flex; gap: 6px; align-items: center;
+}
+.step-dots .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transition: background 0.3s, transform 0.3s;
+}
+.step-dots .dot.active {
+  background: #5a7aff; transform: scale(1.3);
+}
+
+/* ── Side Overlays (Layers 3-5) ── */
+.overlay-panel {
+  position: fixed; top: 60px; right: 2rem; bottom: 160px;
+  width: 440px; z-index: 35;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+  pointer-events: none;
+}
+.overlay-panel.visible { opacity: 1; visibility: visible; pointer-events: auto; }
+
+/* ── Cascade Panel (Layer 2, Step 4) ── */
+#cascade-panel {
+  position: fixed; top: 80px; right: 2rem; z-index: 35;
+  width: 280px; opacity: 0; visibility: hidden;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#cascade-panel.visible { opacity: 1; visibility: visible; }
+.cascade-step {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin-bottom: 0; opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(10px);
+}
+.cascade-step.show { opacity: 1; transform: translateY(0); }
+.cascade-line {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 24px;
+}
+.cascade-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #5a7aff; flex-shrink: 0;
+}
+.cascade-connector {
+  width: 2px; height: 28px; background: rgba(90,122,255,0.3);
+}
+.cascade-label {
+  font-size: 0.78rem; color: #a0aec0; padding-top: 0;
+  line-height: 1.4;
+}
+
+/* ── Map Overlay (Layer 3) ── */
+#map-overlay { display: flex; flex-direction: column; justify-content: center; }
+#map-canvas { width: 100%; border-radius: 8px; }
+.map-legend {
+  display: flex; gap: 1.5rem; margin-top: 0.75rem; font-size: 0.7rem; color: #a0aec0;
+}
+.map-legend span { display: flex; align-items: center; gap: 6px; }
+.legend-swatch {
+  width: 12px; height: 12px; border-radius: 3px;
+}
+
+/* ── Timeline Overlay (Layer 4) ── */
+#timeline-overlay { display: flex; flex-direction: column; justify-content: center; }
+.timeline-item {
+  display: flex; align-items: flex-start; gap: 16px;
+  margin-bottom: 0; opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateX(20px);
+}
+.timeline-item.show { opacity: 1; transform: translateX(0); }
+.tl-year {
+  font-size: 1.1rem; font-weight: 700; color: #5a7aff;
+  min-width: 60px; text-align: right;
+}
+.tl-line {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 20px; padding-top: 4px;
+}
+.tl-dot {
+  width: 10px; height: 10px; border-radius: 50%; background: #5a7aff;
+}
+.tl-connector { width: 2px; height: 36px; background: rgba(90,122,255,0.3); }
+.tl-desc {
+  font-size: 0.85rem; color: #a0aec0; line-height: 1.5; padding-top: 1px;
+}
+.tl-desc .emphasis { color: #cc4444; font-weight: 600; }
+
+/* ── Misinformation Overlay (Layer 5) ── */
+#misinfo-overlay { display: flex; flex-direction: column; justify-content: center; gap: 1.2rem; }
+.misinfo-card {
+  border-radius: 8px; padding: 1.2rem 1.4rem;
+  background: rgba(255,255,255,0.03);
+  opacity: 0; transform: translateY(15px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.misinfo-card.show { opacity: 1; transform: translateY(0); }
+.claim-card { border: 1px solid rgba(204,68,68,0.4); }
+.claim-card .card-label { color: #cc4444; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem; }
+.claim-card .card-text { font-size: 1.1rem; font-style: italic; color: #e0e0e0; line-height: 1.5; }
+.response-card { border: 1px solid rgba(90,122,255,0.4); }
+.response-card .card-label { color: #5a7aff; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem; }
+.response-card .card-text { font-size: 0.85rem; color: #a0aec0; line-height: 1.6; }
+.verdict-line {
+  font-size: 0.95rem; font-weight: 600; color: #48bb78;
+  font-style: italic; text-align: center;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
+}
+.verdict-line.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- Landing -->
+<div id="landing">
+  <div class="subtitle">Omega School / Perceptual Literacy</div>
+  <h1>Hemoglobin</h1>
+  <p class="body-text">One mutation. One amino acid. A story that moves from atom to cell to body to population to justice — visible in three dimensions, understood before words.</p>
+  <button id="start-btn">Start Demo</button>
+</div>
+
+<!-- Top Bar -->
+<div id="top-bar">
+  <span class="left">Omega School</span>
+  <span>Perceptual Literacy Demo — Sickle Cell Hemoglobin</span>
+</div>
+
+<!-- 3D Canvas Container -->
+<div id="scene-container" style="position:fixed;inset:0;z-index:1;"></div>
+
+<!-- Cascade Panel (Layer 2) -->
+<div id="cascade-panel">
+  <div class="cascade-step" data-idx="0">
+    <div class="cascade-line"><div class="cascade-dot"></div><div class="cascade-connector"></div></div>
+    <div class="cascade-label">Valine mutation</div>
+  </div>
+  <div class="cascade-step" data-idx="1">
+    <div class="cascade-line"><div class="cascade-dot"></div><div class="cascade-connector"></div></div>
+    <div class="cascade-label">Polymerization</div>
+  </div>
+  <div class="cascade-step" data-idx="2">
+    <div class="cascade-line"><div class="cascade-dot"></div><div class="cascade-connector"></div></div>
+    <div class="cascade-label">Cell deformation</div>
+  </div>
+  <div class="cascade-step" data-idx="3">
+    <div class="cascade-line"><div class="cascade-dot"></div><div class="cascade-connector"></div></div>
+    <div class="cascade-label">Vessel blockage</div>
+  </div>
+  <div class="cascade-step" data-idx="4">
+    <div class="cascade-line"><div class="cascade-dot"></div></div>
+    <div class="cascade-label">Pain crisis</div>
+  </div>
+</div>
+
+<!-- Map Overlay (Layer 3) -->
+<div id="map-overlay" class="overlay-panel">
+  <canvas id="map-canvas" width="440" height="340"></canvas>
+  <div class="map-legend">
+    <span><div class="legend-swatch" style="background:rgba(120,80,200,0.7)"></div> Sickle cell trait</span>
+    <span><div class="legend-swatch" style="background:rgba(230,180,50,0.7)"></div> Malaria endemic</span>
+  </div>
+</div>
+
+<!-- Timeline Overlay (Layer 4) -->
+<div id="timeline-overlay" class="overlay-panel">
+  <div class="timeline-item" data-idx="0">
+    <div class="tl-year">1910</div>
+    <div class="tl-line"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+    <div class="tl-desc">Sickle cell disease first described</div>
+  </div>
+  <div class="timeline-item" data-idx="1">
+    <div class="tl-year">1938</div>
+    <div class="tl-line"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+    <div class="tl-desc">Cystic fibrosis first described</div>
+  </div>
+  <div class="timeline-item" data-idx="2">
+    <div class="tl-year">1993</div>
+    <div class="tl-line"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+    <div class="tl-desc">CF treatment arrives — <span class="emphasis">55 years</span></div>
+  </div>
+  <div class="timeline-item" data-idx="3">
+    <div class="tl-year">1998</div>
+    <div class="tl-line"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+    <div class="tl-desc">Sickle cell treatment — <span class="emphasis">88 years</span></div>
+  </div>
+  <div class="timeline-item" data-idx="4">
+    <div class="tl-year">2020s</div>
+    <div class="tl-line"><div class="tl-dot"></div></div>
+    <div class="tl-desc">Pain medication disparities <span class="emphasis">persist</span></div>
+  </div>
+</div>
+
+<!-- Misinformation Overlay (Layer 5) -->
+<div id="misinfo-overlay" class="overlay-panel">
+  <div class="misinfo-card claim-card">
+    <div class="card-label">Claim</div>
+    <div class="card-text">"Sickle cell disease is a Black disease."</div>
+  </div>
+  <div class="misinfo-card response-card">
+    <div class="card-label">Response</div>
+    <div class="card-text">An Omega student has held the molecule. They've seen the global distribution — Mediterranean, Middle Eastern, Indian, African. They've watched the evolutionary logic play out across geography. They know this is grey propaganda: selectively true, strategically framed, historically deployed to justify neglect.</div>
+  </div>
+  <div class="verdict-line">"The propaganda cannot reach the perception. A flat lie cannot overwrite spatial understanding."</div>
+</div>
+
+<!-- Narration -->
+<div id="narration">
+  <div class="inner">
+    <div class="layer-label" id="layer-label"></div>
+    <div class="step-title" id="step-title"></div>
+    <div class="step-body" id="step-body"></div>
+    <div class="nav-row">
+      <button class="nav-btn" id="btn-back" disabled>Back</button>
+      <div class="step-dots" id="step-dots"></div>
+      <button class="nav-btn" id="btn-next">Next</button>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ════════════════════════════════════════════
+//  STEP DATA
+// ════════════════════════════════════════════
+const STEPS = [
+  {
+    layer: 'Layer 1', title: 'The Molecule in Space',
+    body: 'Hemoglobin: four protein chains folded around each other in three dimensions. Heme groups nested inside, iron atoms at their center binding oxygen. The whole structure breathes — shifting between tense and relaxed states.',
+    camera: { pos: [0, 2, 18], target: [0, 0, 0] },
+    scene: 'molecule', autoRotateSpeed: 0.5,
+  },
+  {
+    layer: 'Layer 1', title: 'Position Six',
+    body: 'Zoom into the beta-globin chain. Position 6: glutamic acid. Charged. Hydrophilic. Facing outward into water. This is why normal hemoglobin stays dissolved — the surface repels. The molecules don\'t stick together.',
+    camera: { pos: [4.5, -1.5, 5], target: [3.8, -2.2, 0] },
+    scene: 'molecule-zoom', autoRotateSpeed: 0.1,
+  },
+  {
+    layer: 'Layer 1', title: 'The Mutation',
+    body: 'Valine replaces glutamic acid. Hydrophobic. It creates a sticky patch on the surface — a patch that didn\'t exist before. In a textbook this is one sentence. Here, you watch it happen.',
+    camera: { pos: [4.5, -1.5, 5], target: [3.8, -2.2, 0] },
+    scene: 'mutation', autoRotateSpeed: 0.1,
+  },
+  {
+    layer: 'Layer 2', title: 'Polymerization',
+    body: 'Under low oxygen, sticky patches interlock. Molecules form rigid fibers inside the red blood cell — parallel rods that deform the membrane. The disease is not chaos — it is unwanted architecture.',
+    camera: { pos: [0, 0, 22], target: [0, 0, 0] },
+    scene: 'fibers', autoRotateSpeed: 0.3,
+  },
+  {
+    layer: 'Layer 2', title: 'From Molecule to Pain',
+    body: 'One atom changes → surface flips → molecules polymerize → cell deforms → vessel blocks → pain. Every step visible. No step abstract.',
+    camera: { pos: [0, 2, 18], target: [0, 0, 0] },
+    scene: 'cells', autoRotateSpeed: 0.4,
+  },
+  {
+    layer: 'Layer 3', title: 'The Maps',
+    body: 'Where do people carry the sickle cell trait? Overlay where malaria is endemic. The maps overlap almost perfectly. Students see it and ask the question themselves: "Why do these match?"',
+    camera: { pos: [0, 2, 22], target: [0, 0, 0] },
+    scene: 'map', autoRotateSpeed: 0.2,
+  },
+  {
+    layer: 'Layer 3', title: 'Evolution\'s Tradeoff',
+    body: 'One copy protects against malaria. The parasite can\'t survive in sickle cells. Natural selection preserves the trait even though two copies cause disease. Two maps. One tradeoff. Felt, not memorized.',
+    camera: { pos: [0, 2, 22], target: [0, 0, 0] },
+    scene: 'map', autoRotateSpeed: 0.2,
+  },
+  {
+    layer: 'Layer 4', title: 'The Timeline',
+    body: '88 years from discovery to treatment for sickle cell. 55 years for cystic fibrosis. Dramatically more NIH funding per patient for CF. Pain medication disparities into the 2020s. Biology and social failure — in the same space.',
+    camera: { pos: [0, 2, 18], target: [0, 0, 0] },
+    scene: 'timeline', autoRotateSpeed: 0.3,
+  },
+  {
+    layer: 'Layer 5', title: 'Grey Propaganda',
+    body: 'A textbook student hesitates. An Omega student doesn\'t need to fact-check. They\'ve held the molecule. They\'ve seen the global map. They\'ve watched the evolutionary logic play out. They know this is grey propaganda — selectively true, strategically framed.',
+    camera: { pos: [0, 2, 18], target: [0, 0, 0] },
+    scene: 'misinfo', autoRotateSpeed: 0.3,
+  },
+  {
+    layer: 'Conclusion', title: 'Perceptual Literacy',
+    body: 'One disease. One mutation. One molecule. Five layers from atom to justice. The same approach scales to any domain where complex systems are reduced to flat text. This is perceptual literacy. Understanding arrives before the words do.',
+    camera: { pos: [0, 2, 18], target: [0, 0, 0] },
+    scene: 'conclusion', autoRotateSpeed: 0.5,
+  },
+];
+
+// ════════════════════════════════════════════
+//  SCENE SETUP
+// ════════════════════════════════════════════
+const container = document.getElementById('scene-container');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0a0f);
+scene.fog = new THREE.FogExp2(0x0a0a0f, 0.012);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 200);
+camera.position.set(0, 2, 18);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.5;
+controls.maxDistance = 40;
+controls.minDistance = 3;
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0x334466, 0.6);
+scene.add(ambientLight);
+const dirLight = new THREE.DirectionalLight(0xaabbff, 1.0);
+dirLight.position.set(5, 10, 7);
+scene.add(dirLight);
+const dirLight2 = new THREE.DirectionalLight(0xff8866, 0.3);
+dirLight2.position.set(-5, -3, -5);
+scene.add(dirLight2);
+const pointLight = new THREE.PointLight(0x5a7aff, 0.5, 30);
+pointLight.position.set(0, 5, 5);
+scene.add(pointLight);
+
+// ════════════════════════════════════════════
+//  MATERIALS
+// ════════════════════════════════════════════
+const alphaChainMat = new THREE.MeshStandardMaterial({ color: 0x4488cc, roughness: 0.5, metalness: 0.2 });
+const betaChainMat = new THREE.MeshStandardMaterial({ color: 0x4488cc, roughness: 0.5, metalness: 0.2 });
+const betaMutatedMat = new THREE.MeshStandardMaterial({ color: 0xcc4444, roughness: 0.4, metalness: 0.3 });
+const hemeMat = new THREE.MeshStandardMaterial({ color: 0xaa2222, roughness: 0.3, metalness: 0.4 });
+const ironMat = new THREE.MeshStandardMaterial({ color: 0xff6633, roughness: 0.2, metalness: 0.6, emissive: 0xff4400, emissiveIntensity: 0.5 });
+const bondMat = new THREE.MeshStandardMaterial({ color: 0x3366aa, roughness: 0.6, metalness: 0.1, transparent: true, opacity: 0.6 });
+const highlightMat = new THREE.MeshStandardMaterial({ color: 0xffcc00, roughness: 0.2, metalness: 0.3, emissive: 0xffaa00, emissiveIntensity: 0.6, transparent: true, opacity: 0.7 });
+const stickyMat = new THREE.MeshStandardMaterial({ color: 0xcc4444, roughness: 0.2, metalness: 0.3, emissive: 0xcc2222, emissiveIntensity: 0.8, transparent: true, opacity: 0.0 });
+const fiberMat = new THREE.MeshStandardMaterial({ color: 0x994444, roughness: 0.4, metalness: 0.3, transparent: true, opacity: 0.8 });
+const cellMembraneMat = new THREE.MeshStandardMaterial({ color: 0xcc3333, roughness: 0.3, metalness: 0.1, transparent: true, opacity: 0.25, side: THREE.DoubleSide });
+const normalCellMat = new THREE.MeshStandardMaterial({ color: 0xcc4444, roughness: 0.3, metalness: 0.1, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
+const sickleCellMat = new THREE.MeshStandardMaterial({ color: 0x882222, roughness: 0.4, metalness: 0.2, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
+
+// ════════════════════════════════════════════
+//  BUILD HEMOGLOBIN
+// ════════════════════════════════════════════
+const hemoglobinGroup = new THREE.Group();
+scene.add(hemoglobinGroup);
+
+const sphereGeo = new THREE.SphereGeometry(0.28, 16, 12);
+const bondGeo = new THREE.CylinderGeometry(0.06, 0.06, 1, 6);
+const hemeGeo = new THREE.TorusGeometry(0.7, 0.12, 8, 24);
+const ironGeo = new THREE.SphereGeometry(0.2, 12, 8);
+
+const subunits = [];
+const position6Markers = [];
+const stickyPatches = [];
+
+function buildChain(numResidues, helixRadius, helixPitch, startAngle, centerOffset, isAlpha) {
+  const group = new THREE.Group();
+  const mat = isAlpha ? alphaChainMat : betaChainMat;
+  const positions = [];
+
+  for (let i = 0; i < numResidues; i++) {
+    const t = i / numResidues;
+    const angle = startAngle + t * Math.PI * 6;
+    const x = Math.cos(angle) * helixRadius;
+    const y = (t - 0.5) * helixPitch;
+    const z = Math.sin(angle) * helixRadius;
+
+    const sphere = new THREE.Mesh(sphereGeo, mat);
+    sphere.position.set(x, y, z);
+    group.add(sphere);
+    positions.push(new THREE.Vector3(x, y, z));
+
+    // Position 6 marker on beta chains
+    if (!isAlpha && i === 5) {
+      const ringGeo = new THREE.TorusGeometry(0.45, 0.05, 8, 24);
+      const ring = new THREE.Mesh(ringGeo, highlightMat);
+      ring.position.set(x, y, z);
+      ring.visible = false;
+      group.add(ring);
+      position6Markers.push(ring);
+
+      const sticky = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 12), stickyMat.clone());
+      sticky.position.set(x, y, z);
+      sticky.scale.set(0, 0, 0);
+      group.add(sticky);
+      stickyPatches.push({ mesh: sticky, chainSphere: sphere });
+    }
+
+    // Bonds between residues
+    if (i > 0) {
+      const prev = positions[i - 1];
+      const curr = positions[i];
+      const mid = new THREE.Vector3().addVectors(prev, curr).multiplyScalar(0.5);
+      const dir = new THREE.Vector3().subVectors(curr, prev);
+      const len = dir.length();
+      const bond = new THREE.Mesh(bondGeo, bondMat);
+      bond.position.copy(mid);
+      bond.scale.y = len;
+      bond.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+      group.add(bond);
+    }
+  }
+
+  // Heme group
+  const hemeY = 0;
+  const heme = new THREE.Mesh(hemeGeo, hemeMat);
+  heme.position.set(0, hemeY, 0);
+  heme.rotation.x = Math.PI / 2;
+  group.add(heme);
+
+  const iron = new THREE.Mesh(ironGeo, ironMat);
+  iron.position.set(0, hemeY, 0);
+  group.add(iron);
+
+  group.position.copy(centerOffset);
+  return group;
+}
+
+// Tetramer arrangement: 2 alpha (upper), 2 beta (lower)
+const offsets = [
+  { pos: new THREE.Vector3(-2.2, 2, -1.5), isAlpha: true, startAngle: 0 },
+  { pos: new THREE.Vector3(2.2, 2, 1.5), isAlpha: true, startAngle: Math.PI },
+  { pos: new THREE.Vector3(-2.2, -2, 1.5), isAlpha: false, startAngle: Math.PI / 2 },
+  { pos: new THREE.Vector3(2.2, -2, -1.5), isAlpha: false, startAngle: Math.PI * 1.5 },
+];
+
+offsets.forEach(cfg => {
+  const chain = buildChain(30, 1.2, 8, cfg.startAngle, cfg.pos, cfg.isAlpha);
+  hemoglobinGroup.add(chain);
+  subunits.push({ group: chain, isAlpha: cfg.isAlpha });
+});
+
+// ════════════════════════════════════════════
+//  FIBER VISUALIZATION (Layer 2, Step 4)
+// ════════════════════════════════════════════
+const fiberGroup = new THREE.Group();
+fiberGroup.visible = false;
+scene.add(fiberGroup);
+
+// Cell boundary (ellipsoid)
+const cellGeo = new THREE.SphereGeometry(7, 32, 24);
+cellGeo.scale(1.4, 0.5, 1);
+const cellMesh = new THREE.Mesh(cellGeo, cellMembraneMat);
+fiberGroup.add(cellMesh);
+
+// Fibers inside cell
+for (let f = 0; f < 8; f++) {
+  const fiberCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-8 + Math.random() * 2, (f - 4) * 0.5 + Math.random() * 0.3, Math.random() * 2 - 1),
+    new THREE.Vector3(-3 + Math.random(), (f - 4) * 0.5 + Math.random() * 0.3, Math.random() * 2 - 1),
+    new THREE.Vector3(2 + Math.random(), (f - 4) * 0.5 + Math.random() * 0.3, Math.random() * 2 - 1),
+    new THREE.Vector3(7 + Math.random() * 2, (f - 4) * 0.5 + Math.random() * 0.3, Math.random() * 2 - 1),
+  ]);
+  const tubeGeo = new THREE.TubeGeometry(fiberCurve, 32, 0.15, 6, false);
+  const fiber = new THREE.Mesh(tubeGeo, fiberMat);
+  fiberGroup.add(fiber);
+
+  // Add small spheres along fiber to represent hemoglobin units
+  for (let s = 0; s < 12; s++) {
+    const t = s / 11;
+    const pt = fiberCurve.getPointAt(t);
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 6), fiberMat);
+    dot.position.copy(pt);
+    fiberGroup.add(dot);
+  }
+}
+
+// ════════════════════════════════════════════
+//  CELL COMPARISON (Layer 2, Step 5)
+// ════════════════════════════════════════════
+const cellCompGroup = new THREE.Group();
+cellCompGroup.visible = false;
+scene.add(cellCompGroup);
+
+// Normal cell — torus (flexible disc)
+const normalGeo = new THREE.TorusGeometry(2.5, 1.2, 16, 32);
+const normalCell = new THREE.Mesh(normalGeo, normalCellMat);
+normalCell.position.set(-5, 0, 0);
+normalCell.rotation.x = Math.PI / 3;
+cellCompGroup.add(normalCell);
+
+// Label for normal
+const labelNormal = makeTextSprite('Normal RBC', 0.7);
+labelNormal.position.set(-5, -3, 0);
+cellCompGroup.add(labelNormal);
+
+// Sickle cell — curved crescent
+const sickleCurve = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(-2.5, 0.8, 0),
+  new THREE.Vector3(-1, -0.3, 0.3),
+  new THREE.Vector3(0, -0.5, 0),
+  new THREE.Vector3(1, -0.3, -0.3),
+  new THREE.Vector3(2.5, 0.8, 0),
+]);
+const sickleGeo = new THREE.TubeGeometry(sickleCurve, 32, 0.8, 12, false);
+const sickleCell = new THREE.Mesh(sickleGeo, sickleCellMat);
+sickleCell.position.set(5, 0, 0);
+cellCompGroup.add(sickleCell);
+
+const labelSickle = makeTextSprite('Sickle RBC', 0.7);
+labelSickle.position.set(5, -3, 0);
+cellCompGroup.add(labelSickle);
+
+function makeTextSprite(text, size) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.font = '28px Inter, sans-serif';
+  ctx.fillStyle = '#a0aec0';
+  ctx.textAlign = 'center';
+  ctx.fillText(text, 128, 40);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(size * 4, size, 1);
+  return sprite;
+}
+
+// ════════════════════════════════════════════
+//  MAP DRAWING (Layer 3)
+// ════════════════════════════════════════════
+function drawMap() {
+  const canvas = document.getElementById('map-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.fillStyle = '#0f1029';
+  ctx.fillRect(0, 0, W, H);
+
+  // Simplified continent outlines (stylized)
+  ctx.strokeStyle = 'rgba(160,174,192,0.25)';
+  ctx.lineWidth = 1;
+
+  // Africa
+  ctx.beginPath();
+  ctx.moveTo(210, 120); ctx.quadraticCurveTo(195, 140, 190, 170);
+  ctx.quadraticCurveTo(185, 200, 195, 240); ctx.quadraticCurveTo(205, 270, 220, 280);
+  ctx.quadraticCurveTo(235, 270, 245, 240); ctx.quadraticCurveTo(250, 200, 245, 170);
+  ctx.quadraticCurveTo(240, 140, 230, 120); ctx.closePath();
+  ctx.stroke();
+
+  // Europe
+  ctx.beginPath();
+  ctx.moveTo(190, 60); ctx.quadraticCurveTo(200, 50, 220, 55);
+  ctx.quadraticCurveTo(240, 60, 250, 70); ctx.quadraticCurveTo(245, 90, 235, 105);
+  ctx.quadraticCurveTo(220, 115, 200, 110); ctx.quadraticCurveTo(185, 100, 185, 80);
+  ctx.closePath(); ctx.stroke();
+
+  // Middle East
+  ctx.beginPath();
+  ctx.moveTo(255, 100); ctx.quadraticCurveTo(270, 95, 285, 105);
+  ctx.quadraticCurveTo(290, 120, 280, 140); ctx.quadraticCurveTo(265, 145, 255, 135);
+  ctx.quadraticCurveTo(248, 120, 255, 100);
+  ctx.closePath(); ctx.stroke();
+
+  // India
+  ctx.beginPath();
+  ctx.moveTo(300, 110); ctx.quadraticCurveTo(310, 105, 325, 110);
+  ctx.quadraticCurveTo(335, 130, 325, 160); ctx.quadraticCurveTo(315, 180, 310, 175);
+  ctx.quadraticCurveTo(298, 160, 295, 140); ctx.quadraticCurveTo(292, 120, 300, 110);
+  ctx.closePath(); ctx.stroke();
+
+  // SE Asia
+  ctx.beginPath();
+  ctx.moveTo(340, 115); ctx.quadraticCurveTo(355, 110, 370, 120);
+  ctx.quadraticCurveTo(380, 140, 375, 165); ctx.quadraticCurveTo(360, 180, 345, 170);
+  ctx.quadraticCurveTo(335, 150, 340, 115);
+  ctx.closePath(); ctx.stroke();
+
+  // South America
+  ctx.beginPath();
+  ctx.moveTo(120, 165); ctx.quadraticCurveTo(110, 180, 105, 210);
+  ctx.quadraticCurveTo(100, 250, 110, 280); ctx.quadraticCurveTo(120, 300, 130, 290);
+  ctx.quadraticCurveTo(140, 260, 138, 220); ctx.quadraticCurveTo(135, 190, 130, 170);
+  ctx.closePath(); ctx.stroke();
+
+  // North America
+  ctx.beginPath();
+  ctx.moveTo(60, 50); ctx.quadraticCurveTo(80, 40, 120, 45);
+  ctx.quadraticCurveTo(145, 55, 140, 80); ctx.quadraticCurveTo(135, 110, 120, 130);
+  ctx.quadraticCurveTo(110, 145, 100, 140); ctx.quadraticCurveTo(70, 120, 55, 90);
+  ctx.quadraticCurveTo(50, 70, 60, 50);
+  ctx.closePath(); ctx.stroke();
+
+  // Sickle cell trait (purple/blue glow)
+  const sickleRegions = [
+    { x: 215, y: 190, r: 55, intensity: 0.9 },  // Sub-Saharan Africa
+    { x: 220, y: 110, r: 20, intensity: 0.4 },   // Mediterranean
+    { x: 270, y: 120, r: 22, intensity: 0.5 },   // Middle East
+    { x: 310, y: 140, r: 20, intensity: 0.45 },   // India
+  ];
+  sickleRegions.forEach(r => {
+    const grad = ctx.createRadialGradient(r.x, r.y, 0, r.x, r.y, r.r);
+    grad.addColorStop(0, `rgba(120,80,200,${r.intensity * 0.6})`);
+    grad.addColorStop(0.6, `rgba(120,80,200,${r.intensity * 0.25})`);
+    grad.addColorStop(1, 'rgba(120,80,200,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+  });
+
+  // Malaria endemic (yellow/amber glow)
+  const malariaRegions = [
+    { x: 218, y: 195, r: 58, intensity: 0.85 },
+    { x: 222, y: 112, r: 18, intensity: 0.35 },
+    { x: 268, y: 118, r: 20, intensity: 0.4 },
+    { x: 312, y: 138, r: 22, intensity: 0.45 },
+    { x: 355, y: 145, r: 25, intensity: 0.5 },  // SE Asia
+  ];
+  malariaRegions.forEach(r => {
+    const grad = ctx.createRadialGradient(r.x, r.y, 0, r.x, r.y, r.r);
+    grad.addColorStop(0, `rgba(230,180,50,${r.intensity * 0.45})`);
+    grad.addColorStop(0.6, `rgba(230,180,50,${r.intensity * 0.15})`);
+    grad.addColorStop(1, 'rgba(230,180,50,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+  });
+}
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+let currentStep = -1; // -1 = landing
+let targetCamPos = new THREE.Vector3(0, 2, 18);
+let targetLookAt = new THREE.Vector3(0, 0, 0);
+let currentLookAt = new THREE.Vector3(0, 0, 0);
+let mutationApplied = false;
+
+// DOM refs
+const landing = document.getElementById('landing');
+const topBar = document.getElementById('top-bar');
+const narration = document.getElementById('narration');
+const layerLabel = document.getElementById('layer-label');
+const stepTitle = document.getElementById('step-title');
+const stepBody = document.getElementById('step-body');
+const btnBack = document.getElementById('btn-back');
+const btnNext = document.getElementById('btn-next');
+const dotsContainer = document.getElementById('step-dots');
+const cascadePanel = document.getElementById('cascade-panel');
+const mapOverlay = document.getElementById('map-overlay');
+const timelineOverlay = document.getElementById('timeline-overlay');
+const misinfoOverlay = document.getElementById('misinfo-overlay');
+
+// Build step dots
+STEPS.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.classList.add('dot');
+  if (i === 0) dot.classList.add('active');
+  dotsContainer.appendChild(dot);
+});
+
+// ════════════════════════════════════════════
+//  STEP TRANSITIONS
+// ════════════════════════════════════════════
+function goToStep(idx) {
+  if (idx < 0 || idx >= STEPS.length) return;
+  currentStep = idx;
+  const step = STEPS[idx];
+
+  // Update narration
+  layerLabel.textContent = step.layer;
+  stepTitle.textContent = step.title;
+  stepBody.textContent = step.body;
+
+  // Buttons
+  btnBack.disabled = idx === 0;
+  btnNext.textContent = idx === STEPS.length - 1 ? 'Restart' : 'Next';
+
+  // Dots
+  dotsContainer.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+
+  // Camera target
+  targetCamPos.set(...step.camera.pos);
+  targetLookAt.set(...step.camera.target);
+  controls.autoRotateSpeed = step.autoRotateSpeed;
+
+  // Hide all overlays
+  cascadePanel.classList.remove('visible');
+  mapOverlay.classList.remove('visible');
+  timelineOverlay.classList.remove('visible');
+  misinfoOverlay.classList.remove('visible');
+
+  // Reset staggered items
+  document.querySelectorAll('.cascade-step, .timeline-item, .misinfo-card, .verdict-line').forEach(el => el.classList.remove('show'));
+
+  // Scene state
+  hemoglobinGroup.visible = false;
+  fiberGroup.visible = false;
+  cellCompGroup.visible = false;
+
+  switch (step.scene) {
+    case 'molecule':
+      hemoglobinGroup.visible = true;
+      position6Markers.forEach(m => m.visible = false);
+      resetMutation();
+      break;
+
+    case 'molecule-zoom':
+      hemoglobinGroup.visible = true;
+      position6Markers.forEach(m => m.visible = true);
+      resetMutation();
+      break;
+
+    case 'mutation':
+      hemoglobinGroup.visible = true;
+      position6Markers.forEach(m => m.visible = true);
+      applyMutation();
+      break;
+
+    case 'fibers':
+      fiberGroup.visible = true;
+      cascadePanel.classList.add('visible');
+      staggerShow('.cascade-step', 400);
+      break;
+
+    case 'cells':
+      cellCompGroup.visible = true;
+      break;
+
+    case 'map':
+      hemoglobinGroup.visible = true;
+      hemoglobinGroup.visible = false;
+      mapOverlay.classList.add('visible');
+      drawMap();
+      break;
+
+    case 'timeline':
+      hemoglobinGroup.visible = true;
+      timelineOverlay.classList.add('visible');
+      staggerShow('.timeline-item', 500);
+      break;
+
+    case 'misinfo':
+      hemoglobinGroup.visible = true;
+      misinfoOverlay.classList.add('visible');
+      staggerShow('.misinfo-card', 600, () => {
+        document.querySelector('.verdict-line').classList.add('show');
+      });
+      break;
+
+    case 'conclusion':
+      hemoglobinGroup.visible = true;
+      resetMutation();
+      break;
+  }
+}
+
+function staggerShow(selector, delay, callback) {
+  const items = document.querySelectorAll(selector);
+  items.forEach((el, i) => {
+    setTimeout(() => {
+      el.classList.add('show');
+      if (callback && i === items.length - 1) setTimeout(callback, delay);
+    }, delay * (i + 1));
+  });
+}
+
+function applyMutation() {
+  mutationApplied = true;
+  stickyPatches.forEach(sp => {
+    sp.mesh.material.opacity = 0.85;
+    sp.mesh.scale.set(1, 1, 1);
+    sp.chainSphere.material = betaMutatedMat;
+  });
+  // Shift beta chains color
+  subunits.forEach(su => {
+    if (!su.isAlpha) {
+      su.group.traverse(child => {
+        if (child.isMesh && child.material === betaChainMat) {
+          child.material = betaMutatedMat;
+        }
+      });
+    }
+  });
+}
+
+function resetMutation() {
+  mutationApplied = false;
+  stickyPatches.forEach(sp => {
+    sp.mesh.material.opacity = 0;
+    sp.mesh.scale.set(0, 0, 0);
+  });
+  subunits.forEach(su => {
+    if (!su.isAlpha) {
+      su.group.traverse(child => {
+        if (child.isMesh && child.material === betaMutatedMat) {
+          child.material = betaChainMat;
+        }
+      });
+    }
+  });
+}
+
+// ════════════════════════════════════════════
+//  START / NAVIGATION
+// ════════════════════════════════════════════
+function startDemo() {
+  landing.classList.add('hidden');
+  topBar.classList.add('visible');
+  narration.classList.add('visible');
+  goToStep(0);
+}
+
+document.getElementById('start-btn').addEventListener('click', startDemo);
+
+btnNext.addEventListener('click', () => {
+  if (currentStep === STEPS.length - 1) {
+    // Restart
+    currentStep = -1;
+    landing.classList.remove('hidden');
+    topBar.classList.remove('visible');
+    narration.classList.remove('visible');
+    // Hide overlays
+    cascadePanel.classList.remove('visible');
+    mapOverlay.classList.remove('visible');
+    timelineOverlay.classList.remove('visible');
+    misinfoOverlay.classList.remove('visible');
+  } else {
+    goToStep(currentStep + 1);
+  }
+});
+
+btnBack.addEventListener('click', () => {
+  goToStep(currentStep - 1);
+});
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (currentStep === -1) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startDemo(); }
+    return;
+  }
+  if (e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    btnNext.click();
+  }
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    btnBack.click();
+  }
+});
+
+// ════════════════════════════════════════════
+//  SMOOTHSTEP LERP HELPER
+// ════════════════════════════════════════════
+function smoothstep(t) {
+  return t * t * (3 - 2 * t);
+}
+
+// ════════════════════════════════════════════
+//  ANIMATION LOOP
+// ════════════════════════════════════════════
+const clock = new THREE.Clock();
+let breathPhase = 0;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  const elapsed = clock.getElapsedTime();
+
+  // Smooth camera transition
+  const lerpFactor = 1 - Math.pow(0.02, dt);
+  camera.position.lerp(targetCamPos, lerpFactor);
+  currentLookAt.lerp(targetLookAt, lerpFactor);
+
+  // Breathing effect
+  if (hemoglobinGroup.visible) {
+    breathPhase = elapsed;
+    const breathScale = 1 + Math.sin(breathPhase * 1.2) * 0.03;
+    hemoglobinGroup.scale.setScalar(breathScale);
+  }
+
+  // Iron pulsing
+  const ironPulse = 0.4 + Math.sin(elapsed * 2.5) * 0.3;
+  ironMat.emissiveIntensity = ironPulse;
+
+  // Highlight ring rotation
+  position6Markers.forEach(ring => {
+    if (ring.visible) {
+      ring.rotation.x = elapsed * 0.8;
+      ring.rotation.y = elapsed * 0.5;
+    }
+  });
+
+  // Sticky patch pulse
+  if (mutationApplied) {
+    const stickyPulse = 0.6 + Math.sin(elapsed * 3) * 0.25;
+    stickyPatches.forEach(sp => {
+      sp.mesh.material.emissiveIntensity = stickyPulse;
+    });
+  }
+
+  // Normal cell slight wobble
+  if (cellCompGroup.visible) {
+    normalCell.rotation.y = elapsed * 0.3;
+    sickleCell.rotation.y = elapsed * 0.2;
+  }
+
+  controls.target.copy(currentLookAt);
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// ════════════════════════════════════════════
+//  RESIZE
+// ════════════════════════════════════════════
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
