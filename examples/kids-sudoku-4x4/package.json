@@ -1,0 +1,13 @@
+{
+  "name": "kids-sudoku-4x4",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Printable 4x4 sudoku series for kids (2x2 blocks, numbers 1-4)",
+  "main": "sudoku4.js",
+  "bin": { "kids-sudoku": "cli.js" },
+  "scripts": {
+    "start": "node cli.js",
+    "test": "node test.js"
+  },
+  "license": "MIT"
+}
